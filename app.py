@@ -305,15 +305,29 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def check_request(self, mutation=False):
-        host = self.headers.get('Host', '')
-        allowed = {f'localhost:{self.server.server_port}', f'127.0.0.1:{self.server.server_port}'}
-        if host not in allowed:
-            raise PermissionError('Only localhost requests are accepted.')
-        origin = self.headers.get('Origin')
-        if origin and origin not in {'http://' + h for h in allowed}:
-            raise PermissionError('Cross-origin requests are not permitted.')
-        if mutation and self.headers.get('X-TaskNest') != '1':
-            raise PermissionError('Missing request header.')
+        public_host = "streamlit-todo-app-v1-0.onrender.com"
+
+        local_hosts = {
+            f"localhost:{self.server.server_port}",
+            f"127.0.0.1:{self.server.server_port}",
+        }
+
+        allowed_hosts = local_hosts | {public_host}
+        allowed_origins = {
+            *(f"http://{host}" for host in local_hosts),
+            f"https://{public_host}",
+        }
+
+        host = self.headers.get("Host", "")
+        if host not in allowed_hosts:
+            raise PermissionError("Request host is not permitted.")
+
+        origin = self.headers.get("Origin")
+        if origin and origin not in allowed_origins:
+            raise PermissionError("Cross-origin requests are not permitted.")
+
+        if mutation and self.headers.get("X-TaskNest") != "1":
+            raise PermissionError("Missing request header.")
 
     def do_GET(self):
         try:
