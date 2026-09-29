@@ -34,8 +34,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Push to docker hub
+        env: 
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
-          docker tag tasknest:latest ${{ secrets.DOCKER_USERNAME }}/tasknest:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/tasknest:latest
+          docker tag tasknest:latest "${DOCKER_USERNAME}/streamlit-todo-app:v1.0"
+          docker push "${DOCKER_USERNAME}/streamlit-todo-app:v1.0"
 
       
